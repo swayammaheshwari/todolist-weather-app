@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const https = require("https")
 const mongoose = require("mongoose");
 const _ = require("lodash")
 const ejs = require("ejs");
@@ -33,21 +34,43 @@ const List = mongoose.model("List",listSchema);
 
 
 app.get("/", function(req, res) {
-  Item.find({},(err,foundItems)=>{
-    if(foundItems.length === 0){
-      Item.insertMany(defultItem,function(err){
-      if(err){
-      console.log(err)
+  const url = "https://api.openweathermap.org/data/2.5/weather?appid=9f6cf50f86b2729f52e8b0e8c4e0513d&q=khandwa&units=metric";
+  let weatherDetail={};
+  https.get(url,function(response){
+        response.on("data",(data)=>{
+          const weatherData = JSON.parse(data);
+          let city = weatherData.name
+          let temp = weatherData.main.temp
+          let weatherDescription = weatherData.weather[0].description
+          let icon = weatherData.weather[0].icon
+          weatherDetail = {
+            city:city,
+            temp:temp,
+            weatherDescription:weatherDescription,
+            icon:icon
+          }
+        })
+     
+    Item.find({},(err,foundItems)=>{
+      if(foundItems.length === 0){
+        Item.insertMany(defultItem,function(err){
+        if(err){
+        console.log(err)
+        }else{
+        console.log("succesFully saved defult item")
+        }
+        })
+        res.redirect("/");
       }else{
-      console.log("succesFully saved defult item")
+        res.render("list", {listTitle: "Today", newListItems: foundItems,weatherDetail:weatherDetail});
       }
-      })
-      res.redirect("/");
-    }else{
-      res.render("list", {listTitle: "Today", newListItems: foundItems});
-    }
+    })
   })
 });
+
+app.get('/', function (req, res) {
+  
+  })
 
 app.post("/", function(req, res){
   const itemName = req.body.newItem;

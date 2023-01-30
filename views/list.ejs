@@ -1,11 +1,18 @@
 <%- include("header") -%>
+<div class="wet">
+  <h2><%=weatherDetail.city%> <%=weatherDetail.temp%>&#8451;</h2>
+  <h2><%=weatherDetail.weatherDescription %></h2>
+  <img src="http://openweathermap.org/img/wn/<%=weatherDetail.icon%>@2x.png">
+</div>
+
+
 
   <div class="box" id="heading">
     <h1> <%= listTitle %> </h1>
   </div>
 
-  <div class="box">
 
+  <div class="box">
   <%newListItems.forEach(function(item){%>
     <form action="/delete" method="post">
       <div class="item">
