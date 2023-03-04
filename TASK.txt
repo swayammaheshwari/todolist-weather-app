@@ -1,1 +1,0 @@
-#first take permission from user and gets it location 

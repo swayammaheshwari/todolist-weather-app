@@ -6,6 +6,8 @@ const _ = require("lodash")
 const ejs = require("ejs");
 
 const app = express();
+//#first take permission from user and gets it location 
+
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
