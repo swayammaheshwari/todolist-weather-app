@@ -1,19 +1,20 @@
+require('dotenv').config();
 const express = require("express");
-const bodyParser = require("body-parser");
-const https = require("https")
 const mongoose = require("mongoose");
 const _ = require("lodash")
 const ejs = require("ejs");
+const {getWeatherData} = require('./weather')
+console.log(getWeatherData)
+
 
 const app = express();
-//#first take permission from user and gets it location 
 
 
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB", {useNewUrlParser:true});
+mongoose.connect(process.env.MONGOLAB_URI, {useNewUrlParser:true});
 
 const itemSchema = {
   name: String
@@ -35,24 +36,8 @@ const listSchema = {
 const List = mongoose.model("List",listSchema);
 
 
-app.get("/", function(req, res) {
-  const url = "https://api.openweathermap.org/data/2.5/weather?appid=9f6cf50f86b2729f52e8b0e8c4e0513d&q=khandwa&units=metric";
-  let weatherDetail={};
-  https.get(url,function(response){
-        response.on("data",(data)=>{
-          const weatherData = JSON.parse(data);
-          let city = weatherData.name
-          let temp = weatherData.main.temp
-          let weatherDescription = weatherData.weather[0].description
-          let icon = weatherData.weather[0].icon
-          weatherDetail = {
-            city:weatherData.name ,
-            temp:temp,
-            weatherDescription:weatherDescription,
-            icon:icon
-          }
-        })
-     
+app.get("/", function(req, res) { 
+  getWeatherData().then((weatherDetail) => {
     Item.find({},(err,foundItems)=>{
       if(foundItems.length === 0){
         Item.insertMany(defultItem,function(err){
@@ -67,7 +52,7 @@ app.get("/", function(req, res) {
         res.render("list", {listTitle: "Today", newListItems: foundItems,weatherDetail:weatherDetail});
       }
     })
-  })
+  })  
 });
 
 app.get('/', function (req, res) {
@@ -113,6 +98,7 @@ app.post("/delete",function(req,res){
 
 
 app.get("/:customListName",function(req,res){
+  getWeatherData().then((weatherDetail) => {
   const custom = _.capitalize(req.params.customListName);
   List.findOne({name:custom},function(err,foundList){
     if(!err){
@@ -127,19 +113,14 @@ app.get("/:customListName",function(req,res){
       }
       else{
         //show a existing list
-        res.render("list",{listTitle:foundList.name, newListItems: foundList.items})
+        res.render("list",{listTitle:foundList.name, newListItems: foundList.items,weatherDetail})
       }
     }
   });
+})
 });
 
-let port = process.env.PORT;
-if (port == null || port == "") {
-  port = 3000;
-}
 
-app.listen(port, function() {
-  console.log("Server started on port 3000");
+app.listen(process.env.PORT,()=>{
+  console.log(`Server started on http://localhost:${process.env.PORT}`);
 });
-
-// Item.deleteOne({_id:checked},()=>{}) //DONE BY ME
