@@ -44,7 +44,7 @@ app.get("/", function(req, res) {
           let weatherDescription = weatherData.weather[0].description
           let icon = weatherData.weather[0].icon
           weatherDetail = {
-            city:city,
+            city:weatherData.name ,
             temp:temp,
             weatherDescription:weatherDescription,
             icon:icon
@@ -133,7 +133,7 @@ app.get("/:customListName",function(req,res){
 
 let port = process.env.PORT;
 if (port == null || port == "") {
-  port = 80;
+  port = 3000;
 }
 
 app.listen(port, function() {

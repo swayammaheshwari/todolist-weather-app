@@ -1,5 +1,1 @@
-first take permission from user and gets it location 
-
-
-------------------------------------------------------------------------------------------------------------------------------------------------------
-zdfs
+#first take permission from user and gets it location 
